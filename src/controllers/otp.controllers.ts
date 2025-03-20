@@ -151,4 +151,4 @@ const verifyOTP = async (req: Request, res: Response) => {
   }
 };
 
-export default { sendOTP, resendOTP, verifyOTP };
+export default { sendOTP, resendOTP, verifyOTP, generateOTP, sendEmail };

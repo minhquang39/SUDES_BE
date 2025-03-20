@@ -1,4 +1,7 @@
 export enum ErrorCode {
+  // Success (0)
+  SUCCESS = 0,
+
   // Auth errors (1000-1999)
   USER_ALREADY_EXISTS = 1001,
   USER_NOT_VERIFIED = 1002,
@@ -13,6 +16,9 @@ export enum ErrorCode {
   MISSING_FIELDS = 1011,
   USER_EXISTS = 1012,
   TOKEN_GENERATION_FAILED = 1013,
+  UNAUTHORIZED = 1014,
+  TOKEN_INVALID = 1015,
+  TOKEN_EXPIRED = 1016,
 
   // Server errors (5000-5999)
   SERVER_ERROR = 5000,

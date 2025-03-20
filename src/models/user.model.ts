@@ -1,6 +1,18 @@
 import mongoose from "mongoose";
+interface IUser {
+  email: string;
+  first_name: string;
+  last_name: string;
+  password: string;
+  avatar: string;
+  email_verified: boolean;
+  role: string;
+  last_active: Date;
+  googleId: string;
+  phone: string;
+}
 
-const UserSchema = new mongoose.Schema(
+const UserSchema: mongoose.Schema<IUser> = new mongoose.Schema(
   {
     email: {
       type: String,
@@ -34,6 +46,12 @@ const UserSchema = new mongoose.Schema(
     last_active: {
       type: Date,
       default: Date.now,
+    },
+    googleId: {
+      type: String,
+    },
+    phone: {
+      type: String,
     },
   },
   { timestamps: true }

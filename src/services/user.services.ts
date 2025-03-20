@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
-// import jwt from "jsonwebtoken"; // Xóa dòng này
+import otpControllers from "../controllers/otp.controllers";
+import OTP from "../models/otp.model";
 import User from "../models/user.model";
 import { ErrorCode } from "../utils/errorCodes";
 
@@ -118,6 +119,8 @@ const loginUser = async (data: any) => {
         email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
+        phone: user?.phone,
+        avatar: user?.avatar,
       },
     };
   } catch (error) {
@@ -176,4 +179,79 @@ const changePassword = async (data: any) => {
   }
 };
 
-export default { createUser, loginUser, changePassword };
+const forgotPassword = async (data: any) => {
+  const { email } = data;
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw { code: ErrorCode.USER_NOT_FOUND, message: "User not found" };
+  }
+  try {
+    await OTP.deleteMany({ email });
+    const otp = otpControllers.generateOTP();
+    await OTP.create({
+      email,
+      otp,
+    });
+    await otpControllers.sendEmail(email, otp);
+    return { success: true, message: "OTP sent to email" };
+  } catch (error) {
+    throw {
+      code: ErrorCode.SERVER_ERROR,
+      message: "Failed to send OTP",
+    };
+  }
+};
+
+const resetPassword = async (data: any) => {
+  const { email, newPassword } = data;
+  console.log(email, newPassword);
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw { code: ErrorCode.USER_NOT_FOUND, message: "User not found" };
+  }
+  try {
+    const hashPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashPassword;
+    await user.save();
+    return { success: true, message: "Password reset successfully" };
+  } catch (error) {
+    throw { code: ErrorCode.SERVER_ERROR, message: "Failed to reset password" };
+  }
+};
+
+const changeInfo = async (data: any) => {
+  const { email, firstName, lastName, phone } = data;
+  const user = await User.findOne({ email });
+  try {
+    if (!user) {
+      throw { code: ErrorCode.USER_NOT_FOUND, message: "User not found" };
+    }
+    user.first_name = firstName;
+    user.last_name = lastName;
+    user.phone = phone;
+    await user.save();
+    return { success: true, message: "Info changed successfully" };
+  } catch (error) {
+    throw { code: ErrorCode.SERVER_ERROR, message: "Failed to change info" };
+  }
+};
+
+const updateAvatar = async (data: any) => {
+  const { email, avatar } = data;
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw { code: ErrorCode.USER_NOT_FOUND, message: "User not found" };
+  }
+  user.avatar = avatar.path;
+  await user.save();
+  return { path: avatar.path };
+};
+export default {
+  createUser,
+  loginUser,
+  changePassword,
+  forgotPassword,
+  resetPassword,
+  changeInfo,
+  updateAvatar,
+};

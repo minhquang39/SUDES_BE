@@ -3,13 +3,33 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/database";
 import userRoute from "./routes/user.route";
-import bodyParser = require("body-parser");
+import bodyParser from "body-parser";
+import passport from "./config/passport";
+import session from "express-session";
+import { Request, Response } from "express";
 
 // Đảm bảo dotenv được nạp trước khi sử dụng biến môi trường
 dotenv.config();
 
 const port = process.env.PORT || 3000;
 const app = express();
+
+// Cấu hình session
+app.use(
+  session({
+    secret: process.env.JWT_SECRET || "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
+
+// Khởi tạo passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Cấu hình CORS đơn giản hơn
 app.use(
@@ -33,6 +53,32 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
 app.use(bodyParser.json());
+
+// Google Auth Routes
+app.get(
+  "/account/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+app.get(
+  "/account/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  (req: Request, res: Response) => {
+    // Tạo JWT token
+    const token = require("jsonwebtoken").sign(
+      { userId: (req.user as any)._id },
+      process.env.JWT_SECRET || "your-secret-key",
+      { expiresIn: "1h" }
+    );
+
+    // Redirect về trang chủ với token
+    res.redirect(
+      `${
+        process.env.FRONTEND_URL || "https://sudes-1yo2.vercel.app"
+      }/?token=${token}`
+    );
+  }
+);
 
 app.use("/account", userRoute);
 
