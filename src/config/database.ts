@@ -19,7 +19,12 @@ const connectDB = async (): Promise<void> => {
       throw new Error("Missing database connection environment variables");
     }
 
-    await mongoose.connect(uri);
+    await mongoose.connect(uri, {
+      maxPoolSize: 20, // Số connection tối đa trong pool
+      minPoolSize: 5, // Connection tối thiểu
+      serverSelectionTimeoutMS: 5000, // Timeout kết nối DB
+      socketTimeoutMS: 45000, // Timeout socket
+    });
     console.log("Connected to MongoDB database successfully");
   } catch (error) {
     console.error("Error connecting to the database:", error);
