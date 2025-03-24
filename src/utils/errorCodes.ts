@@ -19,6 +19,8 @@ export enum ErrorCode {
   UNAUTHORIZED = 1014,
   TOKEN_INVALID = 1015,
   TOKEN_EXPIRED = 1016,
+  NOT_FOUND = 1017,
+  FORBIDDEN = 1018,
 
   // Server errors (5000-5999)
   SERVER_ERROR = 5000,

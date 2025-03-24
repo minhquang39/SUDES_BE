@@ -3,13 +3,22 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/database";
 import userRoute from "./routes/user.route";
+import addressRoute from "./routes/address.route";
 import bodyParser from "body-parser";
 import passport from "./config/passport";
 import session from "express-session";
 import { Request, Response } from "express";
 
-// Đảm bảo dotenv được nạp trước khi sử dụng biến môi trường
-dotenv.config();
+// Load environment variables based on the environment
+if (process.env.NODE_ENV === "development") {
+  const envConfig = dotenv.config({ path: "./.env.development" });
+  if (envConfig.parsed) {
+    Object.assign(process.env, envConfig.parsed);
+  }
+}
+
+console.log("Current NODE_ENV:", process.env.NODE_ENV);
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -64,24 +73,22 @@ app.get(
   "/account/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
   (req: Request, res: Response) => {
-    // Tạo JWT token
+    // Create JWT token
     const token = require("jsonwebtoken").sign(
       { userId: (req.user as any)._id },
       process.env.JWT_SECRET || "your-secret-key",
       { expiresIn: "1h" }
     );
 
-    // Redirect về trang chủ với token
+    // Redirect to the frontend with the token
     res.redirect(
-      `${
-        process.env.FRONTEND_URL || "https://sudes-1yo2.vercel.app"
-      }/?token=${token}`
+      `${process.env.FRONTEND_URL || "http://localhost:5173"}/?token=${token}`
     );
   }
 );
 
 app.use("/account", userRoute);
-
+app.use("/account/address", addressRoute);
 (async () => {
   try {
     await connectDB();

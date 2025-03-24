@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import otpControllers from "../controllers/otp.controllers";
 import OTP from "../models/otp.model";
 import User from "../models/user.model";
+import Address from "../models/address.model";
 import { ErrorCode } from "../utils/errorCodes";
 
 // Sử dụng require thay vì import
@@ -81,8 +82,13 @@ const createUser = async (data: any) => {
 
 const loginUser = async (data: any) => {
   const { email, password } = data;
-  const user = await User.findOne({ email });
-
+  const user = await User.findOne({ email })
+    .populate({
+      path: "address",
+      select: "-__v -userId  -createdAt -updatedAt",
+    })
+    .exec();
+  console.log(user);
   if (!user) {
     throw { code: ErrorCode.USER_NOT_FOUND, message: "User not found" };
   }
@@ -121,6 +127,7 @@ const loginUser = async (data: any) => {
         last_name: user.last_name,
         phone: user?.phone,
         avatar: user?.avatar,
+        address: user?.address,
       },
     };
   } catch (error) {

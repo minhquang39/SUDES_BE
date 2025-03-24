@@ -10,6 +10,7 @@ interface IUser {
   last_active: Date;
   googleId: string;
   phone: string;
+  address: [{ type: mongoose.Schema.Types.ObjectId; ref: "Address" }];
 }
 
 const UserSchema: mongoose.Schema<IUser> = new mongoose.Schema(
@@ -53,6 +54,7 @@ const UserSchema: mongoose.Schema<IUser> = new mongoose.Schema(
     phone: {
       type: String,
     },
+    address: [{ type: mongoose.Schema.Types.ObjectId, ref: "Address" }],
   },
   { timestamps: true }
 );

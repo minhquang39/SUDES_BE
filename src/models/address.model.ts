@@ -1,20 +1,20 @@
 import mongoose from "mongoose";
 
 interface IAddress {
-  user: mongoose.Types.ObjectId;
+  userId: { type: mongoose.Types.ObjectId; ref: "User" };
   full_name: string;
   phone: string;
+  email: string;
   address_line: string;
   province: string;
   district: string;
   ward: string;
   is_default: boolean;
-  type: "home" | "work" | "other";
 }
 
 const AddressSchema: mongoose.Schema<IAddress> = new mongoose.Schema(
   {
-    user: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -25,6 +25,11 @@ const AddressSchema: mongoose.Schema<IAddress> = new mongoose.Schema(
       trim: true,
     },
     phone: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    email: {
       type: String,
       required: true,
       trim: true,
@@ -52,11 +57,6 @@ const AddressSchema: mongoose.Schema<IAddress> = new mongoose.Schema(
     is_default: {
       type: Boolean,
       default: false,
-    },
-    type: {
-      type: String,
-      enum: ["home", "work", "other"],
-      default: "home",
     },
   },
   {
