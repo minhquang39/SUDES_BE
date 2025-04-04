@@ -82,13 +82,8 @@ const createUser = async (data: any) => {
 
 const loginUser = async (data: any) => {
   const { email, password } = data;
-  const user = await User.findOne({ email })
-    .populate({
-      path: "address",
-      select: "-__v -userId  -createdAt -updatedAt",
-    })
-    .exec();
-  console.log(user);
+  const user = await User.findOne({ email });
+
   if (!user) {
     throw { code: ErrorCode.USER_NOT_FOUND, message: "User not found" };
   }
@@ -127,7 +122,7 @@ const loginUser = async (data: any) => {
         last_name: user.last_name,
         phone: user?.phone,
         avatar: user?.avatar,
-        address: user?.address,
+        role: user?.role,
       },
     };
   } catch (error) {
@@ -211,7 +206,6 @@ const forgotPassword = async (data: any) => {
 
 const resetPassword = async (data: any) => {
   const { email, newPassword } = data;
-  console.log(email, newPassword);
   const user = await User.findOne({ email });
   if (!user) {
     throw { code: ErrorCode.USER_NOT_FOUND, message: "User not found" };
@@ -245,6 +239,7 @@ const changeInfo = async (data: any) => {
 
 const updateAvatar = async (data: any) => {
   const { email, avatar } = data;
+  console.log(avatar);
   const user = await User.findOne({ email });
   if (!user) {
     throw { code: ErrorCode.USER_NOT_FOUND, message: "User not found" };

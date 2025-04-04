@@ -4,6 +4,7 @@ import cors from "cors";
 import connectDB from "./config/database";
 import userRoute from "./routes/user.route";
 import addressRoute from "./routes/address.route";
+import adminRoute from "./routes/admin.route";
 import bodyParser from "body-parser";
 import passport from "./config/passport";
 import session from "express-session";
@@ -16,9 +17,6 @@ if (process.env.NODE_ENV === "development") {
     Object.assign(process.env, envConfig.parsed);
   }
 }
-
-console.log("Current NODE_ENV:", process.env.NODE_ENV);
-console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -89,6 +87,7 @@ app.get(
 
 app.use("/account", userRoute);
 app.use("/account/address", addressRoute);
+app.use("/admin", adminRoute);
 (async () => {
   try {
     await connectDB();

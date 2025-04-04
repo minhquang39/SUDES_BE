@@ -1,7 +1,8 @@
+import { get } from "http";
 import Address from "../models/address.model";
 import User from "../models/user.model";
 import { ErrorCode } from "../utils/errorCodes";
-const createAddress = async (userId: string | any, data: any) => {
+const createAddressService = async (userId: string | any, data: any) => {
   const {
     full_name,
     phone,
@@ -10,7 +11,7 @@ const createAddress = async (userId: string | any, data: any) => {
     province,
     district,
     ward,
-    is_default,
+    is_default = true,
   } = data;
 
   if (
@@ -52,7 +53,7 @@ const createAddress = async (userId: string | any, data: any) => {
       $push: { address: address._id },
     });
 
-    return address;
+    return [defaultAddress, address];
   } catch (error) {
     throw {
       code: ErrorCode.SERVER_ERROR,
@@ -61,7 +62,10 @@ const createAddress = async (userId: string | any, data: any) => {
   }
 };
 
-const deleteAddress = async (userId: string | any, addressId: string | any) => {
+const deleteAddressService = async (
+  userId: string | any,
+  addressId: string | any
+) => {
   try {
     const address = await Address.findById(addressId);
     if (!address) {
@@ -86,7 +90,7 @@ const deleteAddress = async (userId: string | any, addressId: string | any) => {
   }
 };
 
-const updateAddress = async (
+const updateAddressService = async (
   userId: string | any,
   addressId: string | any,
   data: any
@@ -105,61 +109,45 @@ const updateAddress = async (
         message: "You are not allowed to update this address",
       };
     }
-    const updateAddress = async (
-      userId: string | any,
-      addressId: string | any,
-      data: any
-    ) => {
-      try {
-        // Tìm địa chỉ cần cập nhật
-        let address = await Address.findById(addressId);
 
-        if (!address) {
-          throw {
-            code: ErrorCode.NOT_FOUND,
-            message: "Address not found",
-          };
-        }
-
-        if (address.userId.toString() !== userId) {
-          throw {
-            code: ErrorCode.FORBIDDEN,
-            message: "You are not allowed to update this address",
-          };
-        }
-
-        // Kiểm tra và cập nhật địa chỉ mặc định nếu cần
-        if (data.is_default) {
-          // Tìm địa chỉ mặc định khác (nếu có) và bỏ is_default
-          await Address.findOneAndUpdate(
-            { is_default: true },
-            { $set: { is_default: false } }
-          );
-        }
-
-        // Cập nhật và lấy document mới (sử dụng findByIdAndUpdate + options)
-        const updatedAddress = await Address.findByIdAndUpdate(
-          addressId,
-          { $set: data },
-          { new: true } // Quan trọng: { new: true } sẽ trả về document đã được cập nhật
-        );
-
-        return updatedAddress; // Trả về địa chỉ đã cập nhật
-      } catch (error) {
-        console.error("Update address error:", error);
-        throw {
-          code: ErrorCode.SERVER_ERROR,
-          message: "Failed to update address",
-        };
-      }
-    };
+    const {
+      email,
+      name,
+      phone,
+      address_line,
+      province,
+      district,
+      ward,
+      is_default,
+    } = data;
+    let defaultAddress = await Address.findOne({
+      is_default: true,
+    });
+    if (is_default && defaultAddress) {
+      defaultAddress.is_default = false;
+      await defaultAddress.save();
+    }
+    const updateAddress = await Address.findByIdAndUpdate(addressId, data, {
+      new: true,
+    });
+    console.log("defaultAddress: ", defaultAddress);
+    console.log("upateAddress: ", updateAddress);
+    return [defaultAddress, updateAddress];
   } catch (error) {
     throw { code: ErrorCode.SERVER_ERROR, message: "Failed to update address" };
   }
 };
-
+const getAddressService = async (userId: string | any) => {
+  try {
+    const address = await Address.find({ userId });
+    return address;
+  } catch (error) {
+    throw { code: ErrorCode.SERVER_ERROR, message: "Failed to get address" };
+  }
+};
 export default {
-  createAddress,
-  deleteAddress,
-  updateAddress,
+  createAddressService,
+  deleteAddressService,
+  updateAddressService,
+  getAddressService,
 };

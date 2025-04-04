@@ -1,14 +1,14 @@
 import multer from "multer";
 import cloudinary from "../config/cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import { Request, Response } from "express";
+import { Request } from "express";
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req: Request, file: Express.Multer.File) => {
     return {
-      folder: "user/avatar",
-      format: "jpeg",
-      public_id: req.user?.email,
+      folder: "sudes",
+      format: "webp",
+      public_id: `${req.user?.email || "user"}_${Date.now()}`,
     };
   },
 });
