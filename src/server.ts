@@ -70,7 +70,6 @@ app.get(
       { expiresIn: "1h" }
     );
 
-    // Redirect to the frontend with the token
     res.redirect(
       `${process.env.FRONTEND_URL || "http://localhost:5173"}/?token=${token}`
     );
