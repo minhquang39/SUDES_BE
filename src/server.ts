@@ -10,14 +10,6 @@ import passport from "./config/passport";
 import session from "express-session";
 import { Request, Response } from "express";
 
-// Load environment variables based on the environment
-if (process.env.NODE_ENV === "development") {
-  const envConfig = dotenv.config({ path: "./.env.development" });
-  if (envConfig.parsed) {
-    Object.assign(process.env, envConfig.parsed);
-  }
-}
-
 const port = process.env.PORT || 3000;
 const app = express();
 
