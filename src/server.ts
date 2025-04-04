@@ -70,9 +70,9 @@ app.get(
       { expiresIn: "1h" }
     );
 
-    res.redirect(
-      `${process.env.FRONTEND_URL || "http://localhost:5173"}/?token=${token}`
-    );
+    // Chuyển hướng về trang chủ của frontend với token
+    const redirectUrl = `${process.env.FRONTEND_URL}?token=${token}`;
+    res.redirect(redirectUrl);
   }
 );
 
