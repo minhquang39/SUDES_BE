@@ -111,6 +111,41 @@ const deleteParentCategory = async (req: Request, res: Response) => {
   }
 };
 
+const deleteChildCategory = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const result = await categoryService.deleteChildCategoryService(id);
+    res.status(200).json({
+      success: true,
+      message: "Delete child category successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message || "Internal server error",
+      code: error.code,
+    });
+  }
+};
+
+const updateChildCategory = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const name = req.body.name;
+    const result = await categoryService.updateChildCategoryService(id, name);
+    res.status(200).json({
+      success: true,
+      message: "Update child category successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message || "Internal server error",
+      code: error.code,
+    });
+  }
+};
+
 export default {
   createParentCategory,
   createChildCategory,
@@ -118,4 +153,6 @@ export default {
   updatedParentCategory,
   getParentCategoryById,
   deleteParentCategory,
+  deleteChildCategory,
+  updateChildCategory,
 };

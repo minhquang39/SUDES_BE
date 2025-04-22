@@ -5,6 +5,7 @@ import adminMiddleware from "../middlewares/admin.middleware";
 import adminControllers from "../controllers/admin.controllers";
 import policyControllers from "../controllers/policy.controllers";
 import categoryControllers from "../controllers/category.controllers";
+import productControllers from "../controllers/product.controllers";
 const adminRoute = Router();
 
 // Admin
@@ -49,9 +50,48 @@ adminRoute.delete(
   categoryControllers.deleteParentCategory
 );
 
+adminRoute.delete(
+  "/category/child/:id",
+  adminMiddleware,
+  categoryControllers.deleteChildCategory
+);
+
 adminRoute.post(
   "/category/child",
   adminMiddleware,
   categoryControllers.createChildCategory
+);
+
+adminRoute.put(
+  "/category/child/:id",
+  adminMiddleware,
+  categoryControllers.updateChildCategory
+);
+
+// Product route
+// adminRoute.post(
+//   "/product",
+//   adminMiddleware,
+//   upload.array("images", 5),
+//   productControllers.createProduct
+// );
+adminRoute.post(
+  "/product",
+  adminMiddleware,
+  upload.array("images", 5),
+  productControllers.createProduct
+);
+
+adminRoute.get("/product", productControllers.getProducts);
+adminRoute.get("/product/:slug", productControllers.getProductBySlug);
+adminRoute.put(
+  "/product/:id",
+  adminMiddleware,
+  productControllers.updateProduct
+);
+adminRoute.delete(
+  "/product/:id",
+  adminMiddleware,
+  productControllers.deleteProduct
 );
 export default adminRoute;

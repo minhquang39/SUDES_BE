@@ -1,5 +1,6 @@
 import { ErrorCode } from "../utils/errorCodes";
 import Category from "../models/category.model";
+import Product from "../models/product.model";
 import slugify from "slugify";
 
 const createParentCategoryService = async (data: any) => {
@@ -110,16 +111,19 @@ const updateParentCategoryService = async (
 
 const getParentCategoryByIdService = async (id: string) => {
   try {
-    const category = await Category.findById({ _id: id }).select(
-      "-__v -createdAt -updatedAt -parent"
-    );
+    const category = await Category.findById({ _id: id })
+      .populate("children")
+      .select("-__v -createdAt -updatedAt -parent");
     if (!category) {
       throw {
         message: "Category not found",
         code: ErrorCode.CATEGORY_NOT_FOUND,
       };
     }
-    return category;
+    const products = await Product.find({ category: category._id }).select(
+      "-__v -createdAt -updatedAt -category"
+    );
+    return { category, products };
   } catch (error: any) {
     throw {
       message: error.message,
@@ -146,6 +150,53 @@ const deleteParentCategoryService = async (id: string) => {
   }
 };
 
+const deleteChildCategoryService = async (id: string) => {
+  try {
+    const category = await Category.findByIdAndDelete({ _id: id });
+    if (!category) {
+      throw {
+        message: "Category not found",
+        code: ErrorCode.CATEGORY_NOT_FOUND,
+      };
+    }
+    const parentCategory = await Category.findByIdAndUpdate(
+      { _id: category.parent },
+      { $pull: { children: id } },
+      { new: true }
+    );
+    return parentCategory;
+  } catch (error: any) {
+    throw {
+      message: error.message,
+      code: ErrorCode.SERVER_ERROR,
+    };
+  }
+};
+
+const updateChildCategoryService = async (id: string, name: string) => {
+  try {
+    const category = await Category.findById({ _id: id });
+    if (!category) {
+      throw {
+        message: "Category not found",
+        code: ErrorCode.CATEGORY_NOT_FOUND,
+      };
+    }
+    const slug = slugify(name, { lower: true });
+    const updatedCategory = await Category.findByIdAndUpdate(
+      { _id: id },
+      { slug, name },
+      { new: true }
+    );
+    return updatedCategory;
+  } catch (error: any) {
+    throw {
+      message: error.message,
+      code: ErrorCode.SERVER_ERROR,
+    };
+  }
+};
+
 export default {
   createParentCategoryService,
   createChildCategoryService,
@@ -153,4 +204,6 @@ export default {
   updateParentCategoryService,
   getParentCategoryByIdService,
   deleteParentCategoryService,
+  deleteChildCategoryService,
+  updateChildCategoryService,
 };

@@ -18,7 +18,6 @@ const adminMiddleware = (req: Request, res: Response, next: NextFunction) => {
       token,
       process.env.JWT_SECRET || "fallback_secret"
     ) as { userId: string; email: string; role: string };
-    console.log("decoded: ", decoded);
     if (decoded.role !== "admin") {
       res.status(403).json({
         success: false,

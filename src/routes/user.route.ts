@@ -2,6 +2,7 @@ import express, { RequestHandler } from "express";
 import userController from "../controllers/user.controllers";
 import otpController from "../controllers/otp.controllers";
 import authMiddleware from "../middlewares/auth.middleware";
+import addressController from "../controllers/address.controllers";
 import upload from "../middlewares/multer.middleware";
 
 const userRoute = express.Router();
@@ -47,5 +48,15 @@ userRoute.post(
   "/reset-password",
   userController.resetPassword as RequestHandler
 );
+
+// Address Route
+userRoute.get("/address", authMiddleware, addressController.getAddress);
+userRoute.post("/address", authMiddleware, addressController.createAddress);
+userRoute.delete(
+  "/address/:id",
+  authMiddleware,
+  addressController.deleteAddress
+);
+userRoute.put("/address/:id", authMiddleware, addressController.updateAddress);
 
 export default userRoute;

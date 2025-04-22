@@ -16,7 +16,7 @@ const loginAdminService = async (email: string, password: string) => {
     const token = jwt.sign(
       { userId: admin._id, email: admin.email, role: admin.role },
       process.env.JWT_SECRET || "fallback_secret",
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
     return {
       token,

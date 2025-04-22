@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/database";
 import userRoute from "./routes/user.route";
-import addressRoute from "./routes/address.route";
 import adminRoute from "./routes/admin.route";
 import bodyParser from "body-parser";
 import passport from "./config/passport";
@@ -77,7 +76,6 @@ app.get(
 );
 
 app.use("/account", userRoute);
-app.use("/account/address", addressRoute);
 app.use("/admin", adminRoute);
 (async () => {
   try {
