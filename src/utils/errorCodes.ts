@@ -29,4 +29,5 @@ export enum ErrorCode {
   SERVER_ERROR = 5000,
   EMAIL_SEND_FAILED = 5001,
   DATABASE_ERROR = 5002,
+  Invalid = 5003,
 }

@@ -94,6 +94,23 @@ const getParentCategoryById = async (req: Request, res: Response) => {
   }
 };
 
+const getCategoryBySlug = async (req: Request, res: Response) => {
+  try {
+    const slug = req.params.slug;
+    const result = await categoryService.getCategoryBySlug(slug);
+    res.status(200).json({
+      success: true,
+      message: "Get parent category by id successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message || "Internal server error",
+      code: error.code,
+    });
+  }
+};
+
 const deleteParentCategory = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
@@ -155,4 +172,5 @@ export default {
   deleteParentCategory,
   deleteChildCategory,
   updateChildCategory,
+  getCategoryBySlug,
 };

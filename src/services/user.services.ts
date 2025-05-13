@@ -102,8 +102,6 @@ const loginUser = async (data: any) => {
     };
   }
 
-  // Cập nhật last_active
-  user.last_active = new Date();
   await user.save();
 
   const secret: string = process.env.JWT_SECRET || "fallback_secret";

@@ -4,6 +4,8 @@ import otpController from "../controllers/otp.controllers";
 import authMiddleware from "../middlewares/auth.middleware";
 import addressController from "../controllers/address.controllers";
 import upload from "../middlewares/multer.middleware";
+import cartController from "../controllers/cart.controllers";
+import orderControllers from "../controllers/order.controllers";
 
 const userRoute = express.Router();
 
@@ -58,5 +60,37 @@ userRoute.delete(
   addressController.deleteAddress
 );
 userRoute.put("/address/:id", authMiddleware, addressController.updateAddress);
+
+// cart rooute
+userRoute.get("/cart", authMiddleware, cartController.getCart);
+userRoute.post("/cart", authMiddleware, cartController.addToCart);
+userRoute.put("/cart", authMiddleware, cartController.updateCart);
+userRoute.delete("/cart", authMiddleware, cartController.deleteProductCart);
+userRoute.post("/cart/merge", authMiddleware, cartController.mergeCart);
+
+// Order route
+// Luồng 1: Tạo đơn hàng trước, sau đó thanh toán (COD hoặc PayPal)
+userRoute.post("/order", authMiddleware, orderControllers.createOrder);
+userRoute.get("/order", authMiddleware, orderControllers.getOrder);
+userRoute.get("/order/:id", authMiddleware, orderControllers.getOrderById);
+userRoute.put("/order/:id", authMiddleware, orderControllers.updateOrder);
+// Cập nhật trạng thái thanh toán
+userRoute.put(
+  "/order/:id/payment",
+  authMiddleware,
+  orderControllers.updatePaymentStatus
+);
+
+// Luồng 2: Thanh toán PayPal trước, sau đó tạo đơn hàng
+userRoute.post(
+  "/payment/paypal",
+  authMiddleware,
+  orderControllers.createPaypalPayment
+);
+userRoute.post(
+  "/payment/paypal/create-order",
+  authMiddleware,
+  orderControllers.createOrderAfterPayment
+);
 
 export default userRoute;

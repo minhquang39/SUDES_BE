@@ -4,15 +4,16 @@ import cors from "cors";
 import connectDB from "./config/database";
 import userRoute from "./routes/user.route";
 import adminRoute from "./routes/admin.route";
+import dashboardRoute from "./routes/dashboard.route";
 import bodyParser from "body-parser";
 import passport from "./config/passport";
 import session from "express-session";
 import { Request, Response } from "express";
 
+const paypal = require("./config/paypal");
 const port = process.env.PORT || 3000;
 const app = express();
 
-// Cấu hình session
 app.use(
   session({
     secret: process.env.JWT_SECRET || "your-secret-key",
@@ -77,6 +78,28 @@ app.get(
 
 app.use("/account", userRoute);
 app.use("/admin", adminRoute);
+app.use("/dashboard", dashboardRoute);
+
+// Thêm route để test PayPal
+app.get("/test-paypal", async (req: Request, res: Response) => {
+  try {
+    console.log("Testing PayPal integration...");
+    const result = await paypal.createOrder();
+    console.log("PayPal order created successfully:", result);
+    res.status(200).json({
+      message: "PayPal order created successfully",
+      orderId: result.id,
+      orderDetails: result,
+    });
+  } catch (error) {
+    console.error("PayPal test error:", error);
+    res.status(500).json({
+      error: "Failed to create PayPal order",
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
+});
+
 (async () => {
   try {
     await connectDB();

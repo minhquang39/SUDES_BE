@@ -55,7 +55,15 @@ const createProduct = async (req: Request, res: Response) => {
 
 const getProducts = async (req: Request, res: Response) => {
   try {
-    const result = await productService.getProductService();
+    const { page, limit, search } = req.query;
+    const pageNumber = parseInt(page as string);
+    const limitNumber = parseInt(limit as string);
+    const searchString = search ? (search as string) : "";
+    const result = await productService.getProductService(
+      pageNumber,
+      limitNumber,
+      searchString
+    );
     res.status(200).json({
       success: true,
       message: "Get all product success",
@@ -72,7 +80,7 @@ const getProducts = async (req: Request, res: Response) => {
 const getProductBySlug = async (req: Request, res: Response) => {
   const { slug } = req.params;
   try {
-    const result = await Product.findOne({ slug });
+    const result = await productService.getProductBySlugService(slug);
     res.status(200).json({
       success: true,
       message: "Get product by slug successfully",
@@ -86,10 +94,33 @@ const getProductBySlug = async (req: Request, res: Response) => {
   }
 };
 
-const updateProduct = async (req: Request, res: Response) => {
+const getProductById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const result = await productService.updateProductService(id, req.body);
+    const result = await productService.getProductByIdService(id);
+    res.status(200).json({
+      success: true,
+      message: "Get product by id successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message || "Internal server error",
+      code: error.code,
+    });
+  }
+};
+
+const updateProduct = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const files = req.files as Express.Multer.File[];
+  const imageUrls = files ? files.map((file: any) => file.path) : [];
+  try {
+    const result = await productService.updateProductService(
+      id,
+      imageUrls,
+      req.body
+    );
     res.status(200).json({
       success: true,
       message: "Update product successfully",
@@ -123,6 +154,7 @@ export default {
   createProduct,
   getProducts,
   getProductBySlug,
+  getProductById,
   updateProduct,
   deleteProduct,
 };

@@ -7,7 +7,6 @@ interface IUser {
   avatar: string;
   email_verified: boolean;
   role: string;
-  last_active: Date;
   googleId: string;
   phone: string;
   address: [{ type: mongoose.Schema.Types.ObjectId; ref: "Address" }];
@@ -22,11 +21,9 @@ const UserSchema: mongoose.Schema<IUser> = new mongoose.Schema(
     },
     first_name: {
       type: String,
-      required: true,
     },
     last_name: {
       type: String,
-      required: true,
     },
     password: {
       type: String,
@@ -43,10 +40,6 @@ const UserSchema: mongoose.Schema<IUser> = new mongoose.Schema(
       type: String,
       enum: ["user", "admin"],
       default: "user",
-    },
-    last_active: {
-      type: Date,
-      default: Date.now,
     },
     googleId: {
       type: String,

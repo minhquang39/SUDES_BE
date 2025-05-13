@@ -121,13 +121,36 @@ const getParentCategoryByIdService = async (id: string) => {
       };
     }
     const products = await Product.find({ category: category._id }).select(
-      "-__v -createdAt -updatedAt -category"
+      "-__v -createdAt -updatedAt "
     );
     return { category, products };
   } catch (error: any) {
     throw {
       message: error.message,
       code: ErrorCode.SERVER_ERROR,
+    };
+  }
+};
+
+const getCategoryBySlug = async (slug: string) => {
+  try {
+    const category = await Category.findOne({ slug })
+      .populate("children")
+      .select("-__v -createdAt -updatedAt -parent");
+    if (!category) {
+      throw {
+        message: "Category not found",
+        code: ErrorCode.CATEGORY_NOT_FOUND,
+      };
+    }
+
+    const products = await Product.find({ category: category._id });
+
+    return { category, products };
+  } catch (error) {
+    throw {
+      code: ErrorCode.SERVER_ERROR,
+      message: "Failed to get parent categories",
     };
   }
 };
@@ -206,4 +229,5 @@ export default {
   deleteParentCategoryService,
   deleteChildCategoryService,
   updateChildCategoryService,
+  getCategoryBySlug,
 };
