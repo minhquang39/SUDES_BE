@@ -7,11 +7,12 @@ interface IOrderItem {
   price: number;
   quantity: number;
   image?: string;
+  isReviewed?: boolean; 
 }
 
 interface IOrder {
   user: mongoose.Schema.Types.ObjectId;
-  items: IOrderItem[]; // Thêm trường items theo schema
+  items: IOrderItem[]; 
   shippingAddress: {
     fullName: string;
     phone: string;
@@ -41,6 +42,7 @@ const orderItemSchema = new mongoose.Schema<IOrderItem>(
     price: { type: Number, required: true },
     quantity: { type: Number, required: true },
     image: { type: String, required: true },
+    isReviewed: { type: Boolean, default: false },
   },
   { _id: false }
 );
@@ -74,6 +76,6 @@ const OrderSchema = new mongoose.Schema<IOrder>(
   { timestamps: true }
 );
 
-// Tạo và export model
+
 const Order = mongoose.model<IOrder>("Order", OrderSchema);
 export default Order;

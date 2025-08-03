@@ -6,11 +6,8 @@ import User from "../models/user.model";
 import Address from "../models/address.model";
 import { ErrorCode } from "../utils/errorCodes";
 
-// Sử dụng require thay vì import
-
 const jwt = require("jsonwebtoken");
 
-// Đảm bảo dotenv được load
 dotenv.config();
 
 const createUser = async (data: any) => {
@@ -54,15 +51,8 @@ const createUser = async (data: any) => {
   }
 
   const userExist = await User.findOne({ email });
-  if (userExist && userExist.email_verified) {
+  if (userExist) {
     throw { code: ErrorCode.USER_EXISTS, message: "User already exists" };
-  }
-
-  if (userExist && !userExist.email_verified) {
-    throw {
-      code: ErrorCode.USER_NOT_VERIFIED,
-      message: "User is not verified",
-    };
   }
 
   try {
@@ -74,7 +64,14 @@ const createUser = async (data: any) => {
       password: hashPassword,
       email_verified: false,
     });
-    return await user.save();
+    const savedUser = await user.save();
+    return {
+      _id: savedUser._id,
+      email: savedUser.email,
+      first_name: savedUser.first_name,
+      last_name: savedUser.last_name,
+      email_verified: savedUser.email_verified,
+    };
   } catch (error) {
     throw { code: ErrorCode.SERVER_ERROR, message: "Failed to create user" };
   }
@@ -82,7 +79,9 @@ const createUser = async (data: any) => {
 
 const loginUser = async (data: any) => {
   const { email, password } = data;
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).populate(
+    "address recentlyViewedProducts"
+  );
 
   if (!user) {
     throw { code: ErrorCode.USER_NOT_FOUND, message: "User not found" };
@@ -121,10 +120,11 @@ const loginUser = async (data: any) => {
         phone: user?.phone,
         avatar: user?.avatar,
         role: user?.role,
+        address: user?.address,
+        recentlyViewedProducts: user?.recentlyViewedProducts,
       },
     };
   } catch (error) {
-    console.error("JWT Sign Error:", error);
     throw {
       code: ErrorCode.TOKEN_GENERATION_FAILED,
       message: "Failed to generate token",
@@ -135,43 +135,47 @@ const loginUser = async (data: any) => {
 const changePassword = async (data: any) => {
   const { email, oldPassword, newPassword } = data;
 
-  // Tìm user theo email
-  const user = await User.findOne({ email });
-  if (!user) {
-    throw { code: ErrorCode.USER_NOT_FOUND, message: "User not found" };
-  }
-
-  // Xác thực mật khẩu cũ
-  const isMatch = await bcrypt.compare(oldPassword, user.password);
-  if (!isMatch) {
-    throw {
-      code: ErrorCode.INVALID_PASSWORD,
-      message: "Current password is incorrect",
-    };
-  }
-
-  // Kiểm tra mật khẩu mới
-  if (!newPassword || newPassword.length < 8) {
-    throw {
-      code: ErrorCode.INVALID_PASSWORD,
-      message: "New password must be at least 8 characters",
-    };
-  }
-
-  // Kiểm tra mật khẩu mới không giống mật khẩu cũ
-  if (oldPassword === newPassword) {
-    throw {
-      code: ErrorCode.INVALID_PASSWORD,
-      message: "New password must be different from the current password",
-    };
-  }
-
   try {
+    // Tìm user theo email
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw { code: ErrorCode.USER_NOT_FOUND, message: "User not found" };
+    }
+
+    // Xác thực mật khẩu cũ
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      throw {
+        code: ErrorCode.INVALID_PASSWORD,
+        message: "Current password is incorrect",
+      };
+    }
+
+    // Kiểm tra mật khẩu mới
+    if (!newPassword || newPassword.length < 8) {
+      throw {
+        code: ErrorCode.INVALID_PASSWORD,
+        message: "New password must be at least 8 characters",
+      };
+    }
+
+    // Kiểm tra mật khẩu mới không giống mật khẩu cũ
+    if (oldPassword === newPassword) {
+      throw {
+        code: ErrorCode.INVALID_PASSWORD,
+        message: "New password must be different from the current password",
+      };
+    }
+
     const hashPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashPassword;
     await user.save();
     return { success: true, message: "Password changed successfully" };
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code && error.message) {
+      throw error;
+    }
+    // Chỉ ném lỗi server khi không xác định được lỗi gì
     throw {
       code: ErrorCode.SERVER_ERROR,
       message: "Failed to change password",
@@ -246,6 +250,43 @@ const updateAvatar = async (data: any) => {
   await user.save();
   return { path: avatar.path };
 };
+
+const addRecentlyViewedProduct = async (userId: any, data: any) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw { code: ErrorCode.USER_NOT_FOUND, message: "User not found" };
+  }
+
+  if (!user.recentlyViewedProducts) {
+    user.recentlyViewedProducts = [];
+  }
+
+  console.log(data);
+  for (const productId of data) {
+    user.recentlyViewedProducts.push(productId);
+    if (user.recentlyViewedProducts.length > 5) {
+      user.recentlyViewedProducts.shift();
+    }
+  }
+  await user.save();
+  return { success: true, message: "Product added to recently viewed" };
+};
+
+const getRecentlyViewedProducts = async (userId: any) => {
+  const user = await User.findById(userId).populate("recentlyViewedProducts");
+  if (!user) {
+    throw { code: ErrorCode.USER_NOT_FOUND, message: "User not found" };
+  }
+  if (
+    !user.recentlyViewedProducts ||
+    user.recentlyViewedProducts.length === 0
+  ) {
+    return { success: true, message: "No recently viewed products", data: [] };
+  }
+
+  return user.recentlyViewedProducts;
+};
+
 export default {
   createUser,
   loginUser,
@@ -254,4 +295,6 @@ export default {
   resetPassword,
   changeInfo,
   updateAvatar,
+  addRecentlyViewedProduct,
+  getRecentlyViewedProducts,
 };

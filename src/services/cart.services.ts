@@ -15,7 +15,7 @@ export default {
       }
       return cart;
     } catch (error: any) {
-      throw error; // Nên ném lại lỗi để controller xử lý
+      throw error; 
     }
   },
 
@@ -47,14 +47,15 @@ export default {
           SKU: data.SKU,
           quantity: data.quantity,
           price: data.price,
+          oldPrice: data.oldPrice,
           name: data.name,
           image: data.image,
         });
       }
-      await cart.save(); // Lưu lại cart sau khi cập nhật
-      return cart; // Trả về cart đã cập nhật
+      await cart.save();
+      return cart; 
     } catch (error: any) {
-      throw error; // Nên ném lại lỗi để controller xử lý
+      throw error; 
     }
   },
 

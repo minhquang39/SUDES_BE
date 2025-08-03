@@ -86,6 +86,12 @@ const getOrderStats = async (req: Request, res: Response) => {
 
     const orderStats = await Order.aggregate([
       {
+        $match: {
+          orderStatus: "completed",
+          paymentStatus: "paid",
+        },
+      },
+      {
         $group: {
           _id: groupBy,
           count: { $sum: 1 },

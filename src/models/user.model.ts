@@ -10,6 +10,7 @@ interface IUser {
   googleId: string;
   phone: string;
   address: [{ type: mongoose.Schema.Types.ObjectId; ref: "Address" }];
+  recentlyViewedProducts?: mongoose.Types.ObjectId[]; // Mảng ObjectId
 }
 
 const UserSchema: mongoose.Schema<IUser> = new mongoose.Schema(
@@ -48,6 +49,12 @@ const UserSchema: mongoose.Schema<IUser> = new mongoose.Schema(
       type: String,
     },
     address: [{ type: mongoose.Schema.Types.ObjectId, ref: "Address" }],
+    recentlyViewedProducts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
   },
   { timestamps: true }
 );

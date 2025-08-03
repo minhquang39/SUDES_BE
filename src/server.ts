@@ -21,7 +21,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 24 * 60 * 60 * 1000, 
     },
   })
 );
@@ -30,7 +30,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Cấu hình CORS đơn giản hơn
+// Cấu hình CORS 
 app.use(
   cors({
     origin: [
@@ -63,14 +63,12 @@ app.get(
   "/account/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
   (req: Request, res: Response) => {
-    // Create JWT token
     const token = require("jsonwebtoken").sign(
       { userId: (req.user as any)._id },
       process.env.JWT_SECRET || "your-secret-key",
       { expiresIn: "1h" }
     );
 
-    // Chuyển hướng về trang chủ của frontend với token
     const redirectUrl = `${process.env.FRONTEND_URL}?token=${token}`;
     res.redirect(redirectUrl);
   }
@@ -79,25 +77,8 @@ app.get(
 app.use("/account", userRoute);
 app.use("/admin", adminRoute);
 app.use("/dashboard", dashboardRoute);
-
-// Thêm route để test PayPal
-app.get("/test-paypal", async (req: Request, res: Response) => {
-  try {
-    console.log("Testing PayPal integration...");
-    const result = await paypal.createOrder();
-    console.log("PayPal order created successfully:", result);
-    res.status(200).json({
-      message: "PayPal order created successfully",
-      orderId: result.id,
-      orderDetails: result,
-    });
-  } catch (error) {
-    console.error("PayPal test error:", error);
-    res.status(500).json({
-      error: "Failed to create PayPal order",
-      message: error instanceof Error ? error.message : String(error),
-    });
-  }
+app.use("/hello", (req: Request, res: Response) => {
+  res.send("Hello World");
 });
 
 (async () => {

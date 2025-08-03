@@ -23,13 +23,13 @@ const createPaypalPayment = async (userId: string) => {
       return total + item.price * item.quantity;
     }, 0);
 
-    const shippingFee = 40000; // Phí vận chuyển cố định
+    const shippingFee = 40000;
     const finalTotal = totalPrice + shippingFee;
 
-    // Tạo PayPal order trước (không lưu vào database)
-    const exchangeRate = 24000; // 1 USD = 24,000 VND
+
+    const exchangeRate = 24000; 
     const amountUSD = (finalTotal / exchangeRate).toFixed(2);
-    // Gọi API PayPal để tạo order
+    // Gọi API PayPal
     const paypalConfig = require("../config/paypal");
     const accessToken = await paypalConfig.generateAccessToken();
     const paypalUrl =
@@ -64,7 +64,7 @@ const createPaypalPayment = async (userId: string) => {
         },
       }
     );
-
+    console.log("PayPal order response:", response.data);
     return {
       paypalOrderId: response.data.id,
       approvalLink: response.data.links.find(

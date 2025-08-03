@@ -2,12 +2,10 @@ import axios from "axios";
 import { AxiosError } from "axios";
 import dotenv from "dotenv";
 
-// Đảm bảo dotenv được cấu hình
 dotenv.config();
 
 async function generateAccessToken() {
   try {
-    // Kiểm tra client ID và secret
     const clientId = process.env.PAYPAL_CLIENT_ID;
     const clientSecret = process.env.PAYPAL_SECRET;
 
@@ -17,7 +15,6 @@ async function generateAccessToken() {
       );
     }
 
-    // Sử dụng URL sandbox mặc định nếu không có trong biến môi trường
     const paypalUrl =
       process.env.PAYPAL_URL || "https://api-m.sandbox.paypal.com";
 
@@ -50,7 +47,6 @@ async function generateAccessToken() {
   }
 }
 
-// Export các hàm để sử dụng trong server.ts
 const paypalConfig = {
   generateAccessToken,
 };

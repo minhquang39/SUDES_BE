@@ -4,12 +4,10 @@ import User from "../models/user.model";
 import transporter from "../config/email.config";
 import { ErrorCode } from "../utils/errorCodes";
 
-// Hàm tạo OTP ngẫu nhiên
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// Hàm gửi email
 const sendEmail = async (email: string, otp: string) => {
   const mailOptions = {
     from: `SUDES<${process.env.SUB_EMAIL_USERNAME}>`,
@@ -37,17 +35,14 @@ const sendOTP = async (req: Request, res: Response) => {
       });
     }
 
-    // Tạo OTP mới
     const otp = generateOTP();
 
-    // Lưu OTP vào database
     await OTP.create({
       email,
       otp,
       expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 phút
     });
 
-    // Gửi OTP qua email
     await sendEmail(email, otp);
 
     res.status(200).json({
@@ -76,20 +71,16 @@ const resendOTP = async (req: Request, res: Response) => {
       });
     }
 
-    // Xóa OTP cũ nếu có
     await OTP.deleteMany({ email });
 
-    // Tạo OTP mới
     const otp = generateOTP();
 
-    // Lưu OTP mới vào database
     await OTP.create({
       email,
       otp,
       expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 phút
     });
 
-    // Gửi OTP mới qua email
     await sendEmail(email, otp);
 
     res.status(200).json({
@@ -131,10 +122,8 @@ const verifyOTP = async (req: Request, res: Response) => {
       });
     }
 
-    // Cập nhật trạng thái email_verified của user
     await User.findOneAndUpdate({ email }, { email_verified: true });
 
-    // Xóa OTP đã sử dụng
     await OTP.deleteMany({ email });
 
     res.status(200).json({

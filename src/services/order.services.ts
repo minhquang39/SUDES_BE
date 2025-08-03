@@ -24,9 +24,9 @@ const createOrderService = async (userId: string, data: any) => {
       return total + item.price * item.quantity;
     }, 0);
 
-    const shippingFee = 40000; // Phí vận chuyển cố định
+    const shippingFee = 40000;
     for (const item of orderItems) {
-      const productId = item.product; // đảm bảo đúng kiểu
+      const productId = item.product;
       const product = await Product.findById(productId);
       if (!product) {
         throw new Error("Product not found");
@@ -56,7 +56,6 @@ const createOrderService = async (userId: string, data: any) => {
       );
     }
 
-    // Xác định phương thức thanh toán
     const paymentMethod = data.paymentMethod || "cod";
 
     const order = new Order({

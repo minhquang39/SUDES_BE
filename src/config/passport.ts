@@ -19,27 +19,33 @@ passport.use(
     ) {
       try {
         // Kiểm tra xem user đã tồn tại chưa
+        const email = profile.emails[0].value;
+        const googleId = profile.id;
+        const firstName =
+          profile.name.givenName || profile.displayName || "User";
+        const lastName = profile.name.familyName || "Google";
+        const avatar = profile.photos[0].value;
         let user = await User.findOne({ email: profile.emails[0].value });
 
         if (user) {
-          // Nếu user đã tồn tại, cập nhật thông tin Google
           user.googleId = profile.id;
+          user.avatar = avatar;
           await user.save();
           return done(null, user);
         }
 
-        // Nếu user chưa tồn tại, tạo mới
         const hashedPassword = await bcrypt.hash(
           Math.random().toString(36),
           10
         );
         user = await User.create({
-          email: profile.emails[0].value,
-          first_name: profile.name.givenName || profile.displayName || "User",
-          last_name: profile.name.familyName || "Google",
+          email: email,
+          first_name: firstName,
+          last_name: lastName,
           password: hashedPassword,
-          googleId: profile.id,
-          email_verified: true, // Google email đã được xác thực
+          googleId: googleId,
+          avatar: avatar,
+          email_verified: true,
         });
 
         return done(null, user);

@@ -5,6 +5,7 @@ interface ICartItem {
   SKU: string;
   quantity: number;
   price: number;
+  oldPrice?: number;
   name?: string;
   image?: string;
 }
@@ -27,6 +28,9 @@ const CartItemSchema: mongoose.Schema<ICartItem> = new mongoose.Schema({
   price: {
     type: Number,
     required: true,
+  },
+  oldPrice: {
+    type: Number,
   },
   name: {
     type: String,

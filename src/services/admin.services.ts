@@ -26,7 +26,8 @@ const loginAdminService = async (email: string, password: string) => {
         role: admin.role,
       },
     };
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code) throw error;
     throw { code: ErrorCode.SERVER_ERROR, message: "Server error" };
   }
 };

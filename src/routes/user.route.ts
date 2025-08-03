@@ -6,6 +6,7 @@ import addressController from "../controllers/address.controllers";
 import upload from "../middlewares/multer.middleware";
 import cartController from "../controllers/cart.controllers";
 import orderControllers from "../controllers/order.controllers";
+import reviewController from "../controllers/review.controllers";
 
 const userRoute = express.Router();
 
@@ -69,7 +70,6 @@ userRoute.delete("/cart", authMiddleware, cartController.deleteProductCart);
 userRoute.post("/cart/merge", authMiddleware, cartController.mergeCart);
 
 // Order route
-// Luồng 1: Tạo đơn hàng trước, sau đó thanh toán (COD hoặc PayPal)
 userRoute.post("/order", authMiddleware, orderControllers.createOrder);
 userRoute.get("/order", authMiddleware, orderControllers.getOrder);
 userRoute.get("/order/:id", authMiddleware, orderControllers.getOrderById);
@@ -81,7 +81,6 @@ userRoute.put(
   orderControllers.updatePaymentStatus
 );
 
-// Luồng 2: Thanh toán PayPal trước, sau đó tạo đơn hàng
 userRoute.post(
   "/payment/paypal",
   authMiddleware,
@@ -93,4 +92,38 @@ userRoute.post(
   orderControllers.createOrderAfterPayment
 );
 
+// Recent watched products
+userRoute.post(
+  "/recently-viewed",
+  authMiddleware,
+  userController.addRecentlyViewedProduct
+);
+userRoute.get(
+  "/recently-viewed",
+  authMiddleware,
+  userController.getRecentlyViewedProducts
+);
+
+// reviewable products
+userRoute.get(
+  "/reviewable-products",
+  authMiddleware,
+  reviewController.getReviewableProducts
+);
+userRoute.post(
+  "/review-product",
+  authMiddleware,
+  reviewController.postReviewProduct
+);
+
+userRoute.get(
+  "/review-product",
+  authMiddleware,
+  reviewController.getReviewProductByUser
+);
+
+userRoute.get(
+  "/product/:productId/reviews",
+  reviewController.getReviewByProduct
+);
 export default userRoute;

@@ -46,12 +46,11 @@ const changePassword = async (req: Request, res: Response) => {
       success: true,
       message: result.message || "Password changed successfully",
     });
-  } catch (error) {
-    console.error("Change password error:", error);
+  } catch (error: any) {
     res.status(400).json({
       success: false,
-      message:
-        error instanceof Error ? error.message : "Failed to change password",
+      message: error.message || "Failed to change password",
+      code: error.code || ErrorCode.SERVER_ERROR,
     });
   }
 };
@@ -151,6 +150,44 @@ const getUserInfo = async (req: Request, res: Response) => {
   }
 };
 
+const addRecentlyViewedProduct = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+
+    const result = await userServices.addRecentlyViewedProduct(
+      userId,
+      req.body.productIds
+    );
+    res.status(200).json({
+      success: true,
+      message: "Product added to recently viewed successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to add recently viewed product",
+    });
+  }
+};
+
+const getRecentlyViewedProducts = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const result = await userServices.getRecentlyViewedProducts(userId);
+    res.status(200).json({
+      success: true,
+      message: "Get recently viewed products successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to get recently viewed products",
+    });
+  }
+};
+
 export default {
   registerAccount,
   loginAccount,
@@ -160,4 +197,6 @@ export default {
   getUserInfo,
   resetPassword,
   updateAvatar,
+  addRecentlyViewedProduct,
+  getRecentlyViewedProducts,
 };

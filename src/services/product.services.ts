@@ -55,7 +55,7 @@ const getProductService = async (page = 1, limit = 10, query = "") => {
 
 const getProductBySlugService = async (slug: string) => {
   try {
-    const product = await Product.findOne({ slug });
+    const product = await Product.findOne({ slug }).populate("category");
     return product;
   } catch (error: any) {
     throw {
